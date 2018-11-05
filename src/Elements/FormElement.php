@@ -35,6 +35,21 @@ abstract class FormElement implements IFormElement
         return $this;
     }
 
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
+    public function validate()
+    {
+        //TODO:
+    }
+
+    public function getValue()
+    {
+        return $this->value;
+    }
+
     public function createLabel($label)
     {
         return new FormHtmlElement('label', [], $label);

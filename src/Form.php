@@ -16,6 +16,8 @@ class Form extends FormContainer
     public $classes = array();
     private $hash = '';
     private $renderer = null;
+    private $validates=array();
+
 
     public function __construct($action, $method = 'post', $id = '')
     {
@@ -162,4 +164,21 @@ class Form extends FormContainer
         return $this->renderer;
     }
 
+    public function addValidate(callable $callback)
+    {
+        $this->validates[]=$callback;
+    }
+
+    public function validate()
+    {
+        foreach ($this->getElements() as $element) $element->validate();
+        foreach($this->validates as $validate) call_user_func($validate, $this->getValues());
+    }
+
+    public function getValues()
+    {
+        $values=[];
+        foreach($this->getElements() as $element) $values[$element->getName]=$element->getValue;
+        return $values;
+    }
 }
