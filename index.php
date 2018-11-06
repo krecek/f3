@@ -46,6 +46,18 @@ function dd($var, $title)
     var_dump($var);
     echo '</pre>';
 }
+
+function overit(\Jss\Form\FormContainer $form)
+{
+    $values = $form->getValues();
+
+    if($values['a']=='W'){
+        $form->addError('A musí být "W"');
+    }
+//    var_dump($form->getErrors())
+    return !$form->hasError();
+}
+
 include_once 'src/autoload.php';
 //$textInput=new \Jss\Form\FormHtmlElement('input',['a','b'],'text');
 //dd($textInput->getHtml(), 'input');
@@ -57,7 +69,14 @@ include_once 'src/autoload.php';
 
 $form = new Form('', 'get');
 $form->addSelect('a','b',['C'=>'d', 'E'=>'f'])->setPrompt('--aa--');
-$form->setDefaults(['a'=>'C']);
-//dd($form, 'form');
-$s = $form->render();
-echo $s;
+$group = new FormGroup('skupina','Skupina:');
+$group->addText('prvek_skupiny','Prvek skupiny');
+$form->addGroup($group);
+$form->setDefaults(['a'=>'C', 'prvek_skupiny'=>'Jsem prvek skupiny']);
+//$s = $form->render();
+//echo $s;
+$form->setValues(['a'=>'W','prvek_skupiny'=>'RRR']);
+$form->addValidate('overit');
+$form->validate();
+var_dump($form->getErrors());
+//var_dump($form->getValues());

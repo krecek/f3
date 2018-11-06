@@ -11,7 +11,9 @@ class FormContainer implements \ArrayAccess
     protected $elements = array();
     protected $allElements = array();
     protected $counter = 0;
-    protected $hasFile=false;
+    protected $hasFile = false;
+    protected $validates=array();
+    protected $errors=array();
 
     /**
      * @param string
@@ -19,7 +21,7 @@ class FormContainer implements \ArrayAccess
      */
     public function getElement($name)
     {
-        if (isset($this->elements[$name])) return $this->elements[$name];
+        if(isset($this->elements[$name])) return $this->elements[$name];
         else return false;
     }
 
@@ -60,8 +62,8 @@ class FormContainer implements \ArrayAccess
 
     public function addMultipleCheckbox($name, array $values, $selected = '')
     {
-        $last=null;
-        foreach ($values as $key => $value)
+        $last = null;
+        foreach($values as $key => $value)
         {
             $last = $this->addElement(new Elements\FormInputCheckbox($name . "[$key]", $value));
         }
@@ -116,7 +118,7 @@ class FormContainer implements \ArrayAccess
 
     public function addSuggestion($name, $identification, $label = '', $placeholder = '', $selected = '', $width = '100%')
     {
-        return $this->addElement(new Elements\FormSuggestion($name,$identification,$label,$placeholder,$selected,$width));
+        return $this->addElement(new Elements\FormSuggestion($name, $identification, $label, $placeholder, $selected, $width));
     }
 
     protected function addComponent(IFormComponent $component)
@@ -128,20 +130,20 @@ class FormContainer implements \ArrayAccess
 
     protected function addElement(Elements\IFormElement $element)
     {
-        $this->allElements[$element->getName()]=$element;
+        $this->allElements[$element->getName()] = $element;
         return $this->addComponent($element);
     }
 
     public function addGroup(FormGroup $group)
     {
         if($group->hasFile()) $this->afterAddFile();
-        $this->allElements=array_merge($this->allElements, $group->getAllElements());
+        $this->allElements = array_merge($this->allElements, $group->getAllElements());
         return $this->addComponent($group);
     }
 
     protected function afterAddFile()
     {
-        $this->hasFile=true;
+        $this->hasFile = true;
     }
 
     public function removeComponent(IFormComponent $component)
@@ -193,24 +195,51 @@ class FormContainer implements \ArrayAccess
 
     public function addValidate(callable $callback)
     {
-        $this->validates[]=$callback;
+        $this->validates[] = $callback;
     }
 
     public function validate()
     {
-        foreach ($this->getElements() as $element) $element->validate();
-        foreach($this->validates as $validate) call_user_func($validate, $this->getValues());
+        $invalid=0;
+        foreach($this->getAllElements() as $element) $element->validate();
+        foreach($this->validates as $validate)
+        {
+            if(!call_user_func($validate, $this)) $invalid++;
+        }
+        if ($invalid==0 )return true;
+        else return false;
     }
 
     public function getValues()
     {
-        $values=[];
-        foreach($this->getAllElements() as $element) $values[$element->getName()]=$element->getValue();
+        $values = [];
+        foreach($this->getAllElements() as $element) $values[$element->getName()] = $element->getValue();
         return $values;
     }
 
-    public function setValues($values)
-    {
 
+    public function setValues($values = null)
+    {
+        if(!$values) return;
+        foreach($values as $key => $value)
+        {
+            if(isset($this->allElements[$key])) $this->allElements[$key]->setSendValue($value);
+        }
+    }
+
+    public function addError(string $message)
+    {
+        $this->errors[]=$message;
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
+    public function hasError()
+    {
+        return (bool) $this->errors;
     }
 }
+

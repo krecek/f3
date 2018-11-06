@@ -16,7 +16,7 @@ class Form extends FormContainer
     public $classes = array();
     private $hash = '';
     private $renderer = null;
-    private $validates=array();
+    protected $validates = array();
 
 
     public function __construct($action, $method = 'post', $id = '')
@@ -31,23 +31,15 @@ class Form extends FormContainer
 
     public function getValues()
     {
-        $values= parent::getValues();
+        $values = parent::getValues();
         if(isset($values['form_id'])) unset($values['form_id']);
         if(isset($values['send'])) unset($values['send']);
         return $values;
 
     }
 
-    public function setValues($values=null)
-    {
-        if (!$values) return;
-        foreach ($values as $key => $value)
-        {
-            if(isset($this->allElements[$key])) $this->allElements[$key]->setSendValue($value);
-        }
-    }
 
-    public function setMethod($method='post')
+    public function setMethod($method = 'post')
     {
         $this->method = $method;
     }
@@ -72,7 +64,7 @@ class Form extends FormContainer
 
     public function removeClass($class)
     {
-        if (isset($this->classes[$class])) unset($this->classes[$class]);
+        if(isset($this->classes[$class])) unset($this->classes[$class]);
         return $this;
     }
 
@@ -107,6 +99,8 @@ class Form extends FormContainer
         return $this->inline;
     }
 
+
+
     protected function afterAddFile()
     {
         parent::afterAddFile();
@@ -122,10 +116,10 @@ class Form extends FormContainer
 
     public function setDefaults($values = null)
     {
-        if (!$values) return;
-        foreach ($values as $key => $value)
+        if(!$values) return;
+        foreach($values as $key => $value)
         {
-            if ($key !== 'form_id' && isset($this->elements[$key]))
+            if($key !== 'form_id' && isset($this->elements[$key]))
             {
                 $this->elements[$key]->setDefault($value);
             }
@@ -133,14 +127,12 @@ class Form extends FormContainer
     }
 
 
-
-
     public function setErrors($errors = null)
     {
-        if (!$errors) return;
-        foreach ($errors as $key => $error)
+        if(!$errors) return;
+        foreach($errors as $key => $error)
         {
-            if (isset($this->elements[$key]))
+            if(isset($this->elements[$key]))
             {
                 $this->elements[$key]->setError($error);
             }
@@ -181,7 +173,7 @@ class Form extends FormContainer
      */
     public function getRenderer()
     {
-        if ($this->renderer === NULL) $this->renderer = new BootstrapRenderer();
+        if($this->renderer === NULL) $this->renderer = new BootstrapRenderer();
         return $this->renderer;
     }
 

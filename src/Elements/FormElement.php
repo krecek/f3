@@ -27,6 +27,7 @@ abstract class FormElement implements IFormElement
     protected $html_element;
     public $span;
     protected $sendValue;
+    protected $rules=array();
 
     public function __construct($name, $label = '', $value = '')
     {
@@ -43,7 +44,11 @@ abstract class FormElement implements IFormElement
 
     public function validate()
     {
-        //TODO:
+        //todo:
+        foreach($this->rules as $rule)
+        {
+            $rule->validate($this->sendValue);
+        }
     }
 
     public function setSendValue($value)
