@@ -29,6 +29,24 @@ class Form extends FormContainer
         return $this;
     }
 
+    public function getValues()
+    {
+        $values= parent::getValues();
+        if(isset($values['form_id'])) unset($values['form_id']);
+        if(isset($values['send'])) unset($values['send']);
+        return $values;
+
+    }
+
+    public function setValues($values=null)
+    {
+        if (!$values) return;
+        foreach ($values as $key => $value)
+        {
+            if(isset($this->allElements[$key])) $this->allElements[$key]->setSendValue($value);
+        }
+    }
+
     public function setMethod($method='post')
     {
         $this->method = $method;
@@ -114,6 +132,9 @@ class Form extends FormContainer
         }
     }
 
+
+
+
     public function setErrors($errors = null)
     {
         if (!$errors) return;
@@ -164,21 +185,5 @@ class Form extends FormContainer
         return $this->renderer;
     }
 
-    public function addValidate(callable $callback)
-    {
-        $this->validates[]=$callback;
-    }
 
-    public function validate()
-    {
-        foreach ($this->getElements() as $element) $element->validate();
-        foreach($this->validates as $validate) call_user_func($validate, $this->getValues());
-    }
-
-    public function getValues()
-    {
-        $values=[];
-        foreach($this->getElements() as $element) $values[$element->getName]=$element->getValue;
-        return $values;
-    }
 }

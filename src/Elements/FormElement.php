@@ -26,6 +26,7 @@ abstract class FormElement implements IFormElement
     /** @var  @var FormHtmlElement */
     protected $html_element;
     public $span;
+    protected $sendValue;
 
     public function __construct($name, $label = '', $value = '')
     {
@@ -45,9 +46,14 @@ abstract class FormElement implements IFormElement
         //TODO:
     }
 
+    public function setSendValue($value)
+    {
+        $this->sendValue = $value;
+    }
+
     public function getValue()
     {
-        return $this->value;
+        return trim($this->sendValue);
     }
 
     public function createLabel($label)

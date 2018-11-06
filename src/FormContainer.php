@@ -9,6 +9,7 @@ use Jss\Form\Elements\FormButton;
 class FormContainer implements \ArrayAccess
 {
     protected $elements = array();
+    protected $allElements = array();
     protected $counter = 0;
     protected $hasFile=false;
 
@@ -25,6 +26,11 @@ class FormContainer implements \ArrayAccess
     public function getElements()
     {
         return $this->elements;
+    }
+
+    public function getAllElements()
+    {
+        return $this->allElements;
     }
 
     public function addButton($name, $label = '', $content)
@@ -122,12 +128,14 @@ class FormContainer implements \ArrayAccess
 
     protected function addElement(Elements\IFormElement $element)
     {
+        $this->allElements[$element->getName()]=$element;
         return $this->addComponent($element);
     }
 
     public function addGroup(FormGroup $group)
     {
         if($group->hasFile()) $this->afterAddFile();
+        $this->allElements=array_merge($this->allElements, $group->getAllElements());
         return $this->addComponent($group);
     }
 
@@ -181,5 +189,28 @@ class FormContainer implements \ArrayAccess
     public function hasFile()
     {
         return $this->hasFile;
+    }
+
+    public function addValidate(callable $callback)
+    {
+        $this->validates[]=$callback;
+    }
+
+    public function validate()
+    {
+        foreach ($this->getElements() as $element) $element->validate();
+        foreach($this->validates as $validate) call_user_func($validate, $this->getValues());
+    }
+
+    public function getValues()
+    {
+        $values=[];
+        foreach($this->getAllElements() as $element) $values[$element->getName()]=$element->getValue();
+        return $values;
+    }
+
+    public function setValues($values)
+    {
+
     }
 }
