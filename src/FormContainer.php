@@ -193,23 +193,6 @@ class FormContainer implements \ArrayAccess
         return $this->hasFile;
     }
 
-    public function addValidate(callable $callback)
-    {
-        $this->validates[] = $callback;
-    }
-
-    public function validate()
-    {
-        $invalid=0;
-        foreach($this->getAllElements() as $element) $element->validate();
-        foreach($this->validates as $validate)
-        {
-            if(!call_user_func($validate, $this)) $invalid++;
-        }
-        if ($invalid==0 )return true;
-        else return false;
-    }
-
     public function getValues()
     {
         $values = [];

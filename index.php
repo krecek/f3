@@ -1,4 +1,5 @@
 <?php
+session_start();
 /**
  * @package     FORMS
  * @description generování formulářů
@@ -59,6 +60,34 @@ function overit(\Jss\Form\FormContainer $form)
 }
 
 include_once 'src/autoload.php';
+
+
+$form = createForm();
+if(!$_GET['send']) echo $form->render();
+if(isset($_GET['send'])) //odesláno
+{
+    $form->loadValues();
+    $values = $form->getValues();
+    if(!$form->validate())
+    {
+        $form->saveState();
+        //a přesměrovat
+    }
+}
+
+
+
+
+
+function createForm()
+{
+    $form = new Form('','get');
+    $form->addText('a','A:','B');
+    $form->addSubmit('send','Uložit');
+    $form->loadState();
+    return $form;
+}
+die();
 //$textInput=new \Jss\Form\FormHtmlElement('input',['a','b'],'text');
 //dd($textInput->getHtml(), 'input');
 //echo $textInput->getHtml();
@@ -66,6 +95,19 @@ include_once 'src/autoload.php';
 
 //$form = new Form('','get');
 //$form->addTextarea('a','b');
+
+$_SESSION['i']='iii';
+$form = new Form('','get');
+$form->addText('a','A','b');
+$form->setDefaults(['a'=>'C']);
+$form->setValues(['a'=>'E']);
+$form->saveState();
+$form->setValues(['a'=>'D']);
+$form->loadState();
+$s = $form->render();
+echo $s;
+die();
+
 
 $form = new Form('', 'get');
 $form->addSelect('a','b',['C'=>'d', 'E'=>'f'])->setPrompt('--aa--');
@@ -75,8 +117,13 @@ $form->addGroup($group);
 $form->setDefaults(['a'=>'C', 'prvek_skupiny'=>'Jsem prvek skupiny']);
 //$s = $form->render();
 //echo $s;
-$form->setValues(['a'=>'W','prvek_skupiny'=>'RRR']);
-$form->addValidate('overit');
-$form->validate();
-var_dump($form->getErrors());
+//    $form->setDefaults(['prvek_skupiny'=>'X']);
+//$form->setValues(['a'=>'W','prvek_skupiny'=>'RRR']);
+//$form->addValidate('overit');
+//$form->validate();
+//
+//    $form->saveState();
+//
+//var_dump($form->getErrors());
+echo $form->render();
 //var_dump($form->getValues());

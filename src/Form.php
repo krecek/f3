@@ -22,7 +22,7 @@ class Form extends FormContainer
     public function __construct($action, $method = 'post', $id = '')
     {
         $this->action = $action;
-        $this->method = $method;
+        $this->setMethod($method);
         $this->id = $id;
         $this->hash = $this->createHash();
         $this->addHidden('form_id', $this->hash);
@@ -35,13 +35,15 @@ class Form extends FormContainer
         if(isset($values['form_id'])) unset($values['form_id']);
         if(isset($values['send'])) unset($values['send']);
         return $values;
-
     }
-
 
     public function setMethod($method = 'post')
     {
+        $method = strtolower($method);
+        $methods = ['post', 'get'];
+        if(!in_array($method, $methods)) $method = 'post';
         $this->method = $method;
+        var_dump($this->method);
     }
 
     public function setAction($action)
@@ -93,13 +95,10 @@ class Form extends FormContainer
         return $this->attributes;
     }
 
-
     public function getInline()
     {
         return $this->inline;
     }
-
-
 
     protected function afterAddFile()
     {
@@ -107,7 +106,6 @@ class Form extends FormContainer
         $this->setAttribute('enctype', 'multipart/form-data');
         $this->method = 'post';
     }
-
 
     public function setAttribute($key, $value)
     {
@@ -126,6 +124,48 @@ class Form extends FormContainer
         }
     }
 
+    public function addValidate(callable $callback)
+    {
+        $this->validates[] = $callback;
+    }
+
+    public function validate()
+    {
+        $invalid = 0;
+        foreach($this->getAllElements() as $element) $element->validate();
+        foreach($this->validates as $validate)
+        {
+            if(!call_user_func($validate, $this)) $invalid++;
+        }
+        if($invalid == 0) return true;
+        else return false;
+    }
+
+    public function saveState()
+    {
+        $_SESSION['form_errors'] = $this->getErrors();
+        $_SESSION['form_values'] = $this->getValues();
+    }
+
+    public function loadState()
+    {
+        if(isset($_SESSION['form_values']))
+        {
+            $this->setDefaults($_SESSION['form_values']);
+            unset($_SESSION['form_values']);
+        }
+        if(isset($_SESSION['form_errors']))
+        {
+            $this->setErrors($_SESSION['form_errors']);
+            unset($_SESSION['form_errors']);
+        }
+    }
+
+    public function loadValues()
+    {
+        if($this->method == 'post') $this->setValues($_POST);
+        elseif($this->method == 'get') $this->setValues($_GET);
+    }
 
     public function setErrors($errors = null)
     {
