@@ -21,11 +21,10 @@ class Form extends FormContainer
 
     public function __construct($action, $method = 'post', $id = '')
     {
+        $this->hash = $this->createHash();
         $this->action = $action;
         $this->setMethod($method);
         $this->id = $id;
-        $this->hash = $this->createHash();
-        $this->addHidden('form_id', $this->hash);
         return $this;
     }
 
@@ -42,8 +41,9 @@ class Form extends FormContainer
         $method = strtolower($method);
         $methods = ['post', 'get'];
         if(!in_array($method, $methods)) $method = 'post';
+        if($method=='post')  $this->addHash('form_id', $this->hash);
+        elseif (isset($this['form_id'])) unset($this['form_id']);
         $this->method = $method;
-        var_dump($this->method);
     }
 
     public function setAction($action)
@@ -104,7 +104,7 @@ class Form extends FormContainer
     {
         parent::afterAddFile();
         $this->setAttribute('enctype', 'multipart/form-data');
-        $this->method = 'post';
+        $this->setMethod('post');
     }
 
     public function setAttribute($key, $value)
@@ -131,14 +131,9 @@ class Form extends FormContainer
 
     public function validate()
     {
-        $invalid = 0;
         foreach($this->getAllElements() as $element) $element->validate();
-        foreach($this->validates as $validate)
-        {
-            if(!call_user_func($validate, $this)) $invalid++;
-        }
-        if($invalid == 0) return true;
-        else return false;
+        foreach($this->validates as $validate) call_user_func($validate, $this);
+        return !$this->hasError();
     }
 
     public function saveState()

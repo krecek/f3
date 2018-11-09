@@ -121,6 +121,11 @@ class FormContainer implements \ArrayAccess
         return $this->addElement(new Elements\FormSuggestion($name, $identification, $label, $placeholder, $selected, $width));
     }
 
+    public function addHash(string $string, string $hash)
+    {
+        return $this->addElement(new Elements\FormHash($string, $hash));
+    }
+
     protected function addComponent(IFormComponent $component)
     {
         $name = $component->getName();

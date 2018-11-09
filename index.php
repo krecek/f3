@@ -55,17 +55,16 @@ function overit(\Jss\Form\FormContainer $form)
     if($values['a']=='W'){
         $form->addError('A musí být "W"');
     }
-//    var_dump($form->getErrors())
     return !$form->hasError();
 }
 
 include_once 'src/autoload.php';
 
-
 $form = createForm();
 if(!$_GET['send']) echo $form->render();
 if(isset($_GET['send'])) //odesláno
 {
+
     $form->loadValues();
     $values = $form->getValues();
     if(!$form->validate())
@@ -81,7 +80,7 @@ if(isset($_GET['send'])) //odesláno
 
 function createForm()
 {
-    $form = new Form('','get');
+    $form = new Form('','post');
     $form->addText('a','A:','B');
     $form->addSubmit('send','Uložit');
     $form->loadState();
