@@ -17,7 +17,11 @@ class Form extends FormContainer
     private $hash = '';
     private $renderer = null;
     protected $validates = array();
+    protected $loaded = false;
+    protected $checkValidate = false;
 
+
+    const FORM_HASH_NAME = 'form_id';
 
     public function __construct($action, $method = 'post', $id = '')
     {
@@ -30,20 +34,65 @@ class Form extends FormContainer
 
     public function getValues()
     {
+        if (!$this->loaded) $this->loadValues();
         $values = parent::getValues();
-        if(isset($values['form_id'])) unset($values['form_id']);
-        if(isset($values['send'])) unset($values['send']);
+        if (isset($values[self::FORM_HASH_NAME])) unset($values[self::FORM_HASH_NAME]);
+        foreach ($this->submits as $submit => $val)
+        {
+            if (isset($values[$submit])) unset($values[$submit]);
+        }
         return $values;
+    }
+
+    public function submittedBy()
+    {
+        if (!$this->loaded) $this->loadValues();
+        $values = parent::getValues();
+        foreach ($this->submits as $submit => $val)
+        {
+            if (isset($values[$submit]) && $values[$submit] == $val) return $submit;
+        }
+        return false;
+    }
+
+    public function isSubmitted()
+    {
+        return (bool)$this->submittedBy();
+    }
+
+    public function isSuccess()
+    {
+        return ($this->isSubmitted() && $this->validate());
     }
 
     public function setMethod($method = 'post')
     {
         $method = strtolower($method);
         $methods = ['post', 'get'];
-        if(!in_array($method, $methods)) $method = 'post';
-        if($method=='post')  $this->addHash('form_id', $this->hash);
-        elseif (isset($this['form_id'])) unset($this['form_id']);
+        if (!in_array($method, $methods)) $method = 'post';
+        if ($method == 'post') $this->addHash();
+        elseif (isset($this[self::FORM_HASH_NAME])) unset($this[self::FORM_HASH_NAME]);
         $this->method = $method;
+    }
+
+    protected function addHash()
+    {
+        $_SESSION['form_' . $this->hash] = time();
+        return $this->addElement(new Elements\FormInputHidden('' . self::FORM_HASH_NAME . '', $this->hash));
+    }
+
+    protected function validateHash()
+    {
+        if ($this->getMethod() != 'post') return true;
+        $hash = $this[self::FORM_HASH_NAME]->getValue();
+        if (!isset($_SESSION["form_$hash"]))
+        {
+            $this->addError('Selhala kontrola formuláře');
+            return false;
+        }
+        unset($_SESSION["form_$hash"]);
+        foreach ($_SESSION as $key => $time) if (preg_match('~^form_~', $key) && strtotime('-15 minutes') > $time) unset($_SESSION[$key]);
+        return true;
     }
 
     public function setAction($action)
@@ -66,7 +115,7 @@ class Form extends FormContainer
 
     public function removeClass($class)
     {
-        if(isset($this->classes[$class])) unset($this->classes[$class]);
+        if (isset($this->classes[$class])) unset($this->classes[$class]);
         return $this;
     }
 
@@ -114,10 +163,10 @@ class Form extends FormContainer
 
     public function setDefaults($values = null)
     {
-        if(!$values) return;
-        foreach($values as $key => $value)
+        if (!$values) return;
+        foreach ($values as $key => $value)
         {
-            if($key !== 'form_id' && isset($this->elements[$key]))
+            if ($key !== self::FORM_HASH_NAME && isset($this->elements[$key]))
             {
                 $this->elements[$key]->setDefault($value);
             }
@@ -131,8 +180,16 @@ class Form extends FormContainer
 
     public function validate()
     {
-        foreach($this->getAllElements() as $element) $element->validate();
-        foreach($this->validates as $validate) call_user_func($validate, $this);
+        if (!$this->checkValidate)
+        {
+            $this->validateHash();
+            foreach ($this->getAllElements() as $element)
+            {
+                $element->validate();
+            }
+            foreach ($this->validates as $validate) call_user_func($validate, $this);
+            $this->checkValidate = true;
+        }
         return !$this->hasError();
     }
 
@@ -142,35 +199,51 @@ class Form extends FormContainer
         $_SESSION['form_values'] = $this->getValues();
     }
 
+    /**
+     * Obnoví uložený stav formuláře (stav uložit funkcí saveState()
+     */
     public function loadState()
     {
-        if(isset($_SESSION['form_values']))
+        if (isset($_SESSION['form_values']))
         {
             $this->setDefaults($_SESSION['form_values']);
             unset($_SESSION['form_values']);
         }
-        if(isset($_SESSION['form_errors']))
+        if (isset($_SESSION['form_errors']))
         {
+            dd($_SESSION['form_errors'], 'SS');
             $this->setErrors($_SESSION['form_errors']);
             unset($_SESSION['form_errors']);
         }
     }
 
+    /**
+     * Do formuláře načte data odeslaná data
+     */
     public function loadValues()
     {
-        if($this->method == 'post') $this->setValues($_POST);
-        elseif($this->method == 'get') $this->setValues($_GET);
+        if (!$this->loaded)
+        {
+            if ($this->method == 'post') $this->setValues($_POST);
+            elseif ($this->method == 'get') $this->setValues($_GET);
+            $this->loaded = true;
+        }
     }
 
-    public function setErrors($errors = null)
+    /**
+     *
+     * @param array|null $errors
+     */
+    public function setErrors(array $errors = null)
     {
-        if(!$errors) return;
-        foreach($errors as $key => $error)
+        if (!$errors) return;
+        foreach ($errors as $key => $error)
         {
-            if(isset($this->elements[$key]))
+            if (isset($this->allElements[$key]))
             {
-                $this->elements[$key]->setError($error);
+                $this->allElements[$key]->setError($error);
             }
+            else $this->addError($error);
         }
     }
 
@@ -208,7 +281,7 @@ class Form extends FormContainer
      */
     public function getRenderer()
     {
-        if($this->renderer === NULL) $this->renderer = new BootstrapRenderer();
+        if ($this->renderer === NULL) $this->renderer = new BootstrapRenderer();
         return $this->renderer;
     }
 

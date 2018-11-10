@@ -41,7 +41,7 @@ session_start();
 use Jss\Form\Form;
 use Jss\Form\FormGroup;
 
-function dd($var, $title)
+function dd($var, $title = '')
 {
     echo $title . '<pre>';
     var_dump($var);
@@ -52,8 +52,10 @@ function overit(\Jss\Form\FormContainer $form)
 {
     $values = $form->getValues();
 
-    if($values['a']=='W'){
+    if ($values['a'] != 'W')
+    {
         $form->addError('A musí být "W"');
+//        $form['a']->setError('A musí být X');
     }
     return !$form->hasError();
 }
@@ -61,68 +63,31 @@ function overit(\Jss\Form\FormContainer $form)
 include_once 'src/autoload.php';
 
 $form = createForm();
-if(!$_GET['send']) echo $form->render();
-if(isset($_GET['send'])) //odesláno
+if ($form->isSubmitted())
 {
-
-    $form->loadValues();
-    $values = $form->getValues();
+    echo 'Odesláno tlačítkem' . $form->submittedBy();
     if(!$form->validate())
     {
         $form->saveState();
-        //a přesměrovat
+        header("Location: http://localhost/f3/index.php");
     }
+    $values = $form->getValues();
 }
-
-
-
-
+else
+{
+    dd($form->getErrors(), 'chyby');
+    echo $form->render();
+}
+die();
 
 function createForm()
 {
     $form = new Form('','post');
     $form->addText('a','A:','B');
     $form->addSubmit('send','Uložit');
+    $form->addSubmit('odeslano', 'Odeslat');
     $form->loadState();
+    $form->addValidate('overit');
     return $form;
 }
-die();
-//$textInput=new \Jss\Form\FormHtmlElement('input',['a','b'],'text');
-//dd($textInput->getHtml(), 'input');
-//echo $textInput->getHtml();
 
-
-//$form = new Form('','get');
-//$form->addTextarea('a','b');
-
-$_SESSION['i']='iii';
-$form = new Form('','get');
-$form->addText('a','A','b');
-$form->setDefaults(['a'=>'C']);
-$form->setValues(['a'=>'E']);
-$form->saveState();
-$form->setValues(['a'=>'D']);
-$form->loadState();
-$s = $form->render();
-echo $s;
-die();
-
-
-$form = new Form('', 'get');
-$form->addSelect('a','b',['C'=>'d', 'E'=>'f'])->setPrompt('--aa--');
-$group = new FormGroup('skupina','Skupina:');
-$group->addText('prvek_skupiny','Prvek skupiny');
-$form->addGroup($group);
-$form->setDefaults(['a'=>'C', 'prvek_skupiny'=>'Jsem prvek skupiny']);
-//$s = $form->render();
-//echo $s;
-//    $form->setDefaults(['prvek_skupiny'=>'X']);
-//$form->setValues(['a'=>'W','prvek_skupiny'=>'RRR']);
-//$form->addValidate('overit');
-//$form->validate();
-//
-//    $form->saveState();
-//
-//var_dump($form->getErrors());
-echo $form->render();
-//var_dump($form->getValues());

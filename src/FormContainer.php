@@ -14,6 +14,7 @@ class FormContainer implements \ArrayAccess
     protected $hasFile = false;
     protected $validates=array();
     protected $errors=array();
+    protected $submits = [];
 
     /**
      * @param string
@@ -35,6 +36,7 @@ class FormContainer implements \ArrayAccess
         return $this->allElements;
     }
 
+    //<editor-fold desc="Elements">
     public function addButton($name, $label = '', $content)
     {
         return $this->addElement(new FormButton($name, $label, $content));
@@ -52,6 +54,7 @@ class FormContainer implements \ArrayAccess
 
     public function addSubmit($name, $value = '')
     {
+        $this->submits[$name] = $value;
         return $this->addElement(new Elements\FormInputSubmit($name, '', $value));
     }
 
@@ -121,10 +124,7 @@ class FormContainer implements \ArrayAccess
         return $this->addElement(new Elements\FormSuggestion($name, $identification, $label, $placeholder, $selected, $width));
     }
 
-    public function addHash(string $string, string $hash)
-    {
-        return $this->addElement(new Elements\FormHash($string, $hash));
-    }
+    //</editor-fold>
 
     protected function addComponent(IFormComponent $component)
     {
@@ -222,12 +222,16 @@ class FormContainer implements \ArrayAccess
 
     public function getErrors()
     {
+        foreach ($this->getAllElements() as $element)
+        {
+            if ($element->getError()) $this->errors[$element->getName()] = $element->getError();
+        }
         return $this->errors;
     }
 
     public function hasError()
     {
-        return (bool) $this->errors;
+        return (bool)$this->getErrors();
     }
 }
 
