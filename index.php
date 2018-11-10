@@ -57,35 +57,55 @@ function overit(\Jss\Form\FormContainer $form)
         $form->addError('A musí být "W"');
 //        $form['a']->setError('A musí být X');
     }
+    if ($values['b'] != 'C') $form->addError('B musí být "C"');
     return !$form->hasError();
 }
 
 include_once 'src/autoload.php';
 
 $form = createForm();
+$form2 = createForm2();
 if ($form->isSubmitted())
 {
-    echo 'Odesláno tlačítkem' . $form->submittedBy();
-    if(!$form->validate())
+    if (!$form->validate())
     {
         $form->saveState();
         header("Location: http://localhost/f3/index.php");
     }
-    $values = $form->getValues();
+}
+elseif ($form2->isSubmitted())
+{
+    if (!$form2->validate())
+    {
+        $form2->saveState();
+        header("Location: http://localhost/f3/index.php");
+    }
 }
 else
 {
-    dd($form->getErrors(), 'chyby');
+    dd($form->getErrors(), 'chyby form1');
+    dd($form2->getErrors(), 'chyby form2');
     echo $form->render();
+    echo $form2;
 }
 die();
 
 function createForm()
 {
-    $form = new Form('','post');
-    $form->addText('a','A:','B');
-    $form->addSubmit('send','Uložit');
+    $form = new Form('', 'post', 'form1');
+    $form->addText('a', 'A:', 'A');
+    $form->addSubmit('send', 'Uložit');
     $form->addSubmit('odeslano', 'Odeslat');
+    $form->loadState();
+    $form->addValidate('overit');
+    return $form;
+}
+
+function createForm2()
+{
+    $form = new Form('', 'post', 'form2');
+    $form->addText('b', 'B:', 'B');
+    $form->addSubmit('send', 'Uložit');
     $form->loadState();
     $form->addValidate('overit');
     return $form;

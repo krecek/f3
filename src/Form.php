@@ -20,8 +20,10 @@ class Form extends FormContainer
     protected $loaded = false;
     protected $checkValidate = false;
 
-
-    const FORM_HASH_NAME = 'form_id';
+    const FORM_HASH_NAME = 'form_hash';
+    const FORM_ID_NAME = 'form_id';
+    const SESSION_SECTION_DATA = 'form_data';
+    const SESSION_HASH_PREFIX = "form_";
 
     public function __construct($action, $method = 'post', $id = '')
     {
@@ -32,6 +34,10 @@ class Form extends FormContainer
         return $this;
     }
 
+    /**
+     * Vrátí odeslané hodnoty (otrimované, bez odesílacích tlačítek)
+     * @return array
+     */
     public function getValues()
     {
         if (!$this->loaded) $this->loadValues();
@@ -44,6 +50,10 @@ class Form extends FormContainer
         return $values;
     }
 
+    /**
+     * Vrátí name tlačítka, které bylo pužito pro odeslání formuláře
+     * @return string
+     */
     public function submittedBy()
     {
         if (!$this->loaded) $this->loadValues();
@@ -52,19 +62,31 @@ class Form extends FormContainer
         {
             if (isset($values[$submit]) && $values[$submit] == $val) return $submit;
         }
-        return false;
+        return '';
     }
 
+    /**
+     * Je formulář odesláný?
+     * @return bool
+     */
     public function isSubmitted()
     {
         return (bool)$this->submittedBy();
     }
 
+    /**
+     * Je formulář odeslaný a validní?
+     * @return bool
+     */
     public function isSuccess()
     {
         return ($this->isSubmitted() && $this->validate());
     }
 
+    /**
+     * Nastaví get nebo post
+     * @param string $method (get|post)
+     */
     public function setMethod($method = 'post')
     {
         $method = strtolower($method);
@@ -77,7 +99,7 @@ class Form extends FormContainer
 
     protected function addHash()
     {
-        $_SESSION['form_' . $this->hash] = time();
+        $_SESSION[self::SESSION_HASH_PREFIX . $this->hash] = time();
         return $this->addElement(new Elements\FormInputHidden('' . self::FORM_HASH_NAME . '', $this->hash));
     }
 
@@ -85,12 +107,12 @@ class Form extends FormContainer
     {
         if ($this->getMethod() != 'post') return true;
         $hash = $this[self::FORM_HASH_NAME]->getValue();
-        if (!isset($_SESSION["form_$hash"]))
+        if (!isset($_SESSION[self::SESSION_HASH_PREFIX . $hash]))
         {
             $this->addError('Selhala kontrola formuláře');
             return false;
         }
-        unset($_SESSION["form_$hash"]);
+        unset($_SESSION[self::SESSION_HASH_PREFIX . $hash]);
         foreach ($_SESSION as $key => $time) if (preg_match('~^form_~', $key) && strtotime('-15 minutes') > $time) unset($_SESSION[$key]);
         return true;
     }
@@ -144,6 +166,10 @@ class Form extends FormContainer
         return $this->attributes;
     }
 
+    /**
+     * Zobrazuje se formulář v jednom řádku?
+     * @return bool
+     */
     public function getInline()
     {
         return $this->inline;
@@ -161,6 +187,10 @@ class Form extends FormContainer
         $this->attributes[$key] = $value;
     }
 
+    /**
+     * Nastaví výchozí hodnoty formuláře (tj. hodnoty, které se objeví při vykreslení)
+     * @param null $values - jako klíče použít názvy jednotlivých prvků
+     */
     public function setDefaults($values = null)
     {
         if (!$values) return;
@@ -173,11 +203,19 @@ class Form extends FormContainer
         }
     }
 
+    /**
+     * Přidá funkci, která se spustí při validaci.
+     * @param callable $callback - registrovaná funkce musí jako parametr brát Jss\Form
+     */
     public function addValidate(callable $callback)
     {
         $this->validates[] = $callback;
     }
 
+    /**
+     * Validace formuláře - zkontroluje hash (pouze u post), jednotlivé prvky, pak zavolá funkce zaregistrované pomocí addValidation($callback)
+     * @return bool
+     */
     public function validate()
     {
         if (!$this->checkValidate)
@@ -193,10 +231,13 @@ class Form extends FormContainer
         return !$this->hasError();
     }
 
+    /**
+     * Uloží stav formuláře (později ho lze obnovit funkcí loadState())
+     */
     public function saveState()
     {
-        $_SESSION['form_errors'] = $this->getErrors();
-        $_SESSION['form_values'] = $this->getValues();
+        $_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_errors'] = $this->getErrors();
+        $_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_values'] = $this->getValues();
     }
 
     /**
@@ -204,16 +245,15 @@ class Form extends FormContainer
      */
     public function loadState()
     {
-        if (isset($_SESSION['form_values']))
+        if (isset($_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_values']))
         {
-            $this->setDefaults($_SESSION['form_values']);
-            unset($_SESSION['form_values']);
+            $this->setDefaults($_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_values']);
+            unset($_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_values']);
         }
-        if (isset($_SESSION['form_errors']))
+        if (isset($_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_errors']))
         {
-            dd($_SESSION['form_errors'], 'SS');
-            $this->setErrors($_SESSION['form_errors']);
-            unset($_SESSION['form_errors']);
+            $this->setErrors($_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_errors']);
+            unset($_SESSION[self::SESSION_SECTION_DATA][$this->getId()]['form_errors']);
         }
     }
 
@@ -222,7 +262,7 @@ class Form extends FormContainer
      */
     public function loadValues()
     {
-        if (!$this->loaded)
+        if (!$this->loaded && $this->compareId())
         {
             if ($this->method == 'post') $this->setValues($_POST);
             elseif ($this->method == 'get') $this->setValues($_GET);
@@ -231,7 +271,20 @@ class Form extends FormContainer
     }
 
     /**
-     *
+     * Zjistí, zda id formuláře odpovídá odeslaným datům
+     * @return bool
+     */
+    protected function compareId()
+    {
+        $result = false;
+        if (!$this->id) $result = true;
+        elseif ($this->method == 'post' && isset($_POST[self::FORM_ID_NAME]) && $this->id == $_POST[self::FORM_ID_NAME]) $result = true;
+        elseif ($this->method == 'get' && isset($_GET[self::FORM_ID_NAME]) && $this->id == $_GET[self::FORM_ID_NAME]) $result = true;
+        return $result;
+    }
+
+    /**
+     * Nastaví chybové hlášky jednotlivýcm prvkům nebo celému formuláři
      * @param array|null $errors
      */
     public function setErrors(array $errors = null)
@@ -247,8 +300,14 @@ class Form extends FormContainer
         }
     }
 
+    protected function beforeRender()
+    {
+        if ($this->id) $this->addHidden(self::FORM_ID_NAME, $this->id);
+    }
+
     public function render()
     {
+        $this->beforeRender();
         $renderer = $this->getRenderer();
         $s = $renderer->render($this);
         return $s;
