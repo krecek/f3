@@ -27,6 +27,8 @@ class Form extends FormContainer
     const SESSION_SECTION_DATA = 'form_data';
     const SESSION_HASH_PREFIX = "form_";
 
+
+
     public function __construct($action, $method = 'post', $id = '')
     {
         $this->hash = $this->createHash();

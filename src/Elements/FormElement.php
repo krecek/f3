@@ -4,6 +4,8 @@ namespace Jss\Form\Elements;
 
 
 use Jss\Form\FormHtmlElement;
+use Jss\Validator\Rule\IRule;
+use Jss\Validator\Validator;
 
 abstract class FormElement implements IFormElement
 {
@@ -27,7 +29,7 @@ abstract class FormElement implements IFormElement
     protected $html_element;
     public $span;
     protected $sendValue;
-    protected $rules=array();
+    protected $rules = array();
 
     public function __construct($name, $label = '', $value = '')
     {
@@ -42,14 +44,6 @@ abstract class FormElement implements IFormElement
         $this->value = $value;
     }
 
-    public function validate()
-    {
-        //todo:
-        foreach($this->rules as $rule)
-        {
-            $rule->validate($this->sendValue);
-        }
-    }
 
     public function setSendValue($value)
     {
@@ -74,9 +68,9 @@ abstract class FormElement implements IFormElement
     public function getHtmlElement()
     {
         $element = new FormHtmlElement($this->html_element_type);
-        foreach ($this->attributes as $attribute => $val) $element->setAttribute($attribute, $val);
-        if ($this->isRequired()) $element->setUnpairedAttribute('required');
-        foreach ($this->classes as $class) $element->addClass($class);
+        foreach($this->attributes as $attribute => $val) $element->setAttribute($attribute, $val);
+        if($this->isRequired()) $element->setUnpairedAttribute('required');
+        foreach($this->classes as $class) $element->addClass($class);
         return $element;
     }
 
@@ -152,13 +146,13 @@ abstract class FormElement implements IFormElement
     public function addClass($class)
     {
         $this->classes[$class] = $class;
-        if (isset($this->classes_removed[$class])) unset($this->classes_removed[$class]);
+        if(isset($this->classes_removed[$class])) unset($this->classes_removed[$class]);
         return $this;
     }
 
     public function removeClass($class)
     {
-        if (isset($this->classes[$class])) unset($this->classes[$class]);
+        if(isset($this->classes[$class])) unset($this->classes[$class]);
         $this->classes_removed[$class] = $class;
         return $this;
     }
@@ -166,13 +160,13 @@ abstract class FormElement implements IFormElement
     public function addWrapperClass($class)
     {
         $this->wrapper_classes[$class] = $class;
-        if (isset($this->wrapper_classes_removed[$class])) unset($this->wrapper_classes_removed[$class]);
+        if(isset($this->wrapper_classes_removed[$class])) unset($this->wrapper_classes_removed[$class]);
         return $this;
     }
 
     public function removeWrapperClass($class)
     {
-        if (isset($this->wrapper_classes[$class])) unset($this->wrapper_classes[$class]);
+        if(isset($this->wrapper_classes[$class])) unset($this->wrapper_classes[$class]);
         $this->wrapper_classes_removed[$class] = $class;
         return $this;
     }
@@ -196,8 +190,25 @@ abstract class FormElement implements IFormElement
 
     protected function str2bool($str)
     {
-        if ($str === true || in_array($str, ['A', 'Y', 'ANO', 'on', '1'], true)) return true;
+        if($str === true || in_array($str, ['A', 'Y', 'ANO', 'on', '1'], true)) return true;
         else return false;
+    }
+
+    public function addRule($rule, $message=null, $parameter=null)
+    {
+        $r = new \Rule($rule);
+        $r->setErrorMessage($message);
+        if(!is_array($parameter)) $parameter = [$parameter];
+        $r->setParameters($parameter);
+        $this->rules[] = $r;
+    }
+
+    public function validate()
+    {
+        foreach($this->rules as $rule)
+        {
+            if(!$rule->validate($this->sendValue)) $this->setError($rule->getErrorMessage());
+        }
     }
 
 }
