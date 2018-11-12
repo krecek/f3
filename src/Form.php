@@ -19,6 +19,8 @@ class Form extends FormContainer
     protected $validates = array();
     protected $loaded = false;
     protected $checkValidate = false;
+    protected $checkHash = true;
+
 
     const FORM_HASH_NAME = 'form_hash';
     const FORM_ID_NAME = 'form_id';
@@ -32,6 +34,11 @@ class Form extends FormContainer
         $this->setMethod($method);
         $this->id = $id;
         return $this;
+    }
+
+    public function setCheckHash($check = true)
+    {
+        $this->checkHash = (bool)$check;
     }
 
     /**
@@ -107,12 +114,15 @@ class Form extends FormContainer
     {
         if ($this->getMethod() != 'post') return true;
         $hash = $this[self::FORM_HASH_NAME]->getValue();
-        if (!isset($_SESSION[self::SESSION_HASH_PREFIX . $hash]))
+        if ($this->checkHash)
         {
-            $this->addError('Selhala kontrola formuláře');
-            return false;
+            if (!isset($_SESSION[self::SESSION_HASH_PREFIX . $hash]))
+            {
+                $this->addError('Selhala kontrola formuláře');
+                return false;
+            }
         }
-        unset($_SESSION[self::SESSION_HASH_PREFIX . $hash]);
+        if (isset($_SESSION[self::SESSION_HASH_PREFIX . $hash])) unset($_SESSION[self::SESSION_HASH_PREFIX . $hash]);
         foreach ($_SESSION as $key => $time) if (preg_match('~^form_~', $key) && strtotime('-15 minutes') > $time) unset($_SESSION[$key]);
         return true;
     }

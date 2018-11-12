@@ -57,7 +57,7 @@ function overit(\Jss\Form\FormContainer $form)
         $form->addError('A musí být "W"');
 //        $form['a']->setError('A musí být X');
     }
-    if ($values['b'] != 'C') $form->addError('B musí být "C"');
+//    if ($values['b'] != 'C') $form->addError('B musí být "C"');
     return !$form->hasError();
 }
 
@@ -72,6 +72,10 @@ if ($form->isSubmitted())
         $form->saveState();
         header("Location: http://localhost/f3/index.php");
     }
+    else
+    {
+        dd($form->getValues(), 'values form1');
+    }
 }
 elseif ($form2->isSubmitted())
 {
@@ -79,6 +83,10 @@ elseif ($form2->isSubmitted())
     {
         $form2->saveState();
         header("Location: http://localhost/f3/index.php");
+    }
+    else
+    {
+        dd($form2->getValues(), 'values form2');
     }
 }
 else
