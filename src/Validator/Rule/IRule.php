@@ -6,7 +6,7 @@
  * Time: 15:09
  */
 
-namespace Jss\Validator\Rule;
+namespace Jss\Form\Validator\Rule;
 
 
 interface IRule
@@ -15,4 +15,11 @@ interface IRule
     public function getParameters();
 
     public function validate($value);
+
+    public function setErrorMessage($message);
+
+    public function setParameters(array $parameters = array());
+
+    public function getErrorMessage();
+
 }

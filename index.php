@@ -112,7 +112,7 @@ function createForm()
 function createForm2()
 {
     $form = new Form('', 'post', 'form2');
-    $form->addText('b', 'B:', 'B');
+    $form->addText('b', 'B:', 'B')->addRule('Jss\Form\Validator\Validator::equal','Hodnota musí být rovna %s','Q');
     $form->addSubmit('send', 'Uložit');
     $form->loadState();
     $form->addValidate('overit');

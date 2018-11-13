@@ -1,15 +1,15 @@
 <?php
 
-
-class Rule
+namespace Jss\Form\Validator\Rule;
+class Rule implements IRule
 {
     protected $parameters = [];
     protected $errorMessage;
-    protected $type;
+    protected $callback;
 
-    public function __construct($type)
+    public function __construct($callback)
     {
-        $this->type = $type;
+        $this->callback = $callback;
     }
 
     public function setErrorMessage($message)
@@ -24,7 +24,7 @@ class Rule
 
     public function validate($value)
     {
-
+        return call_user_func_array($this->callback,array_merge($value,$this->parameters));
     }
 
     public function setParameters(array $parameters=array())

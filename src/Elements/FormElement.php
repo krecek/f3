@@ -4,8 +4,9 @@ namespace Jss\Form\Elements;
 
 
 use Jss\Form\FormHtmlElement;
-use Jss\Validator\Rule\IRule;
-use Jss\Validator\Validator;
+use Jss\Form\Validator\Rule\IRule;
+use Jss\Form\Validator\Rule\Rule;
+use Jss\Form\Validator\Validator;
 
 abstract class FormElement implements IFormElement
 {
@@ -194,9 +195,9 @@ abstract class FormElement implements IFormElement
         else return false;
     }
 
-    public function addRule($rule, $message=null, $parameter=null)
+    public function addRule($callback, $message=null, $parameter=null)
     {
-        $r = new \Rule($rule);
+        $r = new Rule($callback);
         $r->setErrorMessage($message);
         if(!is_array($parameter)) $parameter = [$parameter];
         $r->setParameters($parameter);
