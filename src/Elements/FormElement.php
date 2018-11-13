@@ -4,9 +4,7 @@ namespace Jss\Form\Elements;
 
 
 use Jss\Form\FormHtmlElement;
-use Jss\Form\Validator\Rule\IRule;
 use Jss\Form\Validator\Rule\Rule;
-use Jss\Form\Validator\Validator;
 
 abstract class FormElement implements IFormElement
 {

@@ -37,7 +37,7 @@ class FormContainer implements \ArrayAccess
     }
 
     //<editor-fold desc="Elements">
-    public function addButton($name, $label = '', $content)
+    public function addButton($name, $label = '', $content='')
     {
         return $this->addElement(new FormButton($name, $label, $content));
     }

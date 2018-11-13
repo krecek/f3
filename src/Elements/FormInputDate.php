@@ -48,5 +48,3 @@ class FormInputDate extends FormElementInput
         return $s;
     }
 }
-
-?>

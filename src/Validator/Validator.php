@@ -42,7 +42,7 @@ class Validator
         return !self::equal($value,$equalTo);
     }
 
-    public static function filled($value, $max)
+    public static function filled($value)
     {
         if(is_null($value) || $value === '') return false;
         return true;

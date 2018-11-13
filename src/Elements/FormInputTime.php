@@ -10,7 +10,7 @@ class FormInputTime extends FormElementInput
 {
     protected $type = 'text';
 
-    public function __construct($name, $label = '', $id, $value = null)
+    public function __construct($name, $label = '', $id='time', $value = null)
     {
         if ($value) $value = date('H:i', strtotime($value));
         parent::__construct($name, $label, $value);
@@ -51,4 +51,4 @@ class FormInputTime extends FormElementInput
     }
 }
 
-?>
+

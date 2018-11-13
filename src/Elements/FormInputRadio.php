@@ -67,4 +67,4 @@ class FormInputRadio extends FormElement
 
 }
 
-?>
+
