@@ -7,7 +7,7 @@ class FormInputRadio extends FormElement
 {
 
     protected $type = 'radio';
-    protected $value=[];
+    public $value = [];
     protected $selected;
 
     public function __construct($name, $label = '', $values = '', $selected = '')
@@ -33,6 +33,7 @@ class FormInputRadio extends FormElement
         $options = [];
         foreach ($this->value as $key => $text) $options[] = $this->createOption($key, $text, $this->selected == $key);
         $element = new FormHtmlElement('div');
+        foreach($options as $option) $element->addContent($option);
         return $element;
     }
 
@@ -42,6 +43,7 @@ class FormInputRadio extends FormElement
         $control = new FormHtmlElement($this->html_element_type);
         $control->setAttribute('name', $this->name);
         $control->setAttribute('value', $value);
+        $control->setAttribute('type', $this->elementType);
         if ($checked) $control->setUnpairedAttribute('checked');
         $label->addContent($control);
         $label->addContent($text);
@@ -57,7 +59,7 @@ class FormInputRadio extends FormElement
         foreach ($this->value as $key => $text)
         {
             $s .= "<label class='" . join(' ', $this->classes) . "'>";
-            $s .= "<input type='$this->type' name='$this->name' value='$key'" . ($this->selected == $key ? "checked='checked'" : "") . "> $text";
+            $s .= "<input type='$this->type' name='$this->name' value='$key'" . ($this->selected == $key?"checked='checked'":"") . ">$text";
             $s .= "</label>";
         }
         $s .= "</div>";
