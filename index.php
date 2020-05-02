@@ -39,7 +39,6 @@ session_start();
 
 
 use Jss\Form\Form;
-use Jss\Form\FormGroup;
 
 function dd($var, $title = '')
 {
@@ -55,48 +54,58 @@ function overit(\Jss\Form\FormContainer $form)
     if ($values['a'] != 'W')
     {
         $form->addError('A musí být "W"');
-//        $form['a']->setError('A musí být X');
+        //        $form['a']->setError('A musí být X');
     }
-//    if ($values['b'] != 'C') $form->addError('B musí být "C"');
+    //    if ($values['b'] != 'C') $form->addError('B musí být "C"');
     return !$form->hasError();
 }
 
 include_once 'src/autoload.php';
+//$form = createForm3();
+//echo $form;
 
-$form = createForm();
-$form2 = createForm2();
-if ($form->isSubmitted())
-{
-    if (!$form->validate())
-    {
-        $form->saveState();
-        header("Location: http://localhost/f3/index.php");
-    }
-    else
-    {
-        dd($form->getValues(), 'values form1');
-    }
-}
-elseif ($form2->isSubmitted())
-{
-    if (!$form2->validate())
-    {
-        $form2->saveState();
-        header("Location: http://localhost/f3/index.php");
-    }
-    else
-    {
-        dd($form2->getValues(), 'values form2');
-    }
-}
-else
-{
-    dd($form->getErrors(), 'chyby form1');
-    dd($form2->getErrors(), 'chyby form2');
-    echo $form->render();
-    echo $form2;
-}
+
+//$form = createForm();
+//$form2 = createForm2();
+//if ($form->isSubmitted())
+//{
+//    if (!$form->validate())
+//    {
+//        $form->saveState();
+//        header("Location: http://localhost/f3/index.php");
+//    }
+//    else
+//    {
+//        dd($form->getValues(), 'values form1');
+//    }
+//}
+//elseif ($form2->isSubmitted())
+//{
+//    if (!$form2->validate())
+//    {
+//        $form2->saveState();
+//        header("Location: http://localhost/f3/index.php");
+//    }
+//    else
+//    {
+//        dd($form2->getValues(), 'values form2');
+//    }
+//}
+//else
+//{
+//    dd($form->getErrors(), 'chyby form1');
+//    dd($form2->getErrors(), 'chyby form2');
+//    echo $form->render();
+//    echo $form2;
+//}
 die();
+
+function createForm3()
+{
+    $form = new Form('');
+    $form->addRadio('nazev', 'Název', ['a' => 'A', 'b' => 'B']);
+    return $form;
+}
 
 function createForm()
 {

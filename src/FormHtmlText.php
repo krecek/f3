@@ -9,11 +9,11 @@ class FormHtmlText
 
     function __construct($text)
     {
-        $this->content[0] = $text;
+        $this->elementContent[0] = $text;
     }
 
-    public function getHtml(): string
+    public function getHtml()
     {
-        return $this->content[0];
+        return $this->elementContent[0];
     }
 }

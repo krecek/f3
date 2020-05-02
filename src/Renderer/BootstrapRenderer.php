@@ -84,6 +84,7 @@ class BootstrapRenderer implements IFormRenderer
                 $wrapper->addContent($element->getLabel());
                 $wrapper->addContent($element->getHtmlElement());
                 if ($element->hasError()) $wrapper->addContent(new FormHtmlElement('span', ['help-block', 'with-errors'], $element->getError()));
+                if ($element->hasHelp()) $wrapper->addContent(new FormHtmlElement('p', ['help-block'], $element->getHelp()));
                 $s .= $wrapper->getHtml();
                 break;
             case "text":
@@ -118,6 +119,7 @@ class BootstrapRenderer implements IFormRenderer
                 $wrapper->addContent($element->getLabel());
                 $wrapper->addContent($control);
                 if ($element->hasError()) $wrapper->addContent(new FormHtmlElement('span', ['help-block', 'with-errors'], $element->getError()));
+                if ($element->hasHelp()) $wrapper->addContent(new FormHtmlElement('p', ['help-block'], $element->getHelp()));
                 $s .= $wrapper->getHtml();
                 break;
             case "checkbox":
@@ -162,9 +164,14 @@ class BootstrapRenderer implements IFormRenderer
      * @param FormElement $element
      * @param $wrapper
      */
-    protected function renderElementSpan(FormElement $element,FormHtmlElement $wrapper)
+    protected function renderElementSpan(FormElement $element, FormHtmlElement $wrapper)
     {
         if ($element->span) $wrapper->addContent(new FormHtmlElement('span', [$element->span]));
+    }
+
+    protected function renderElementHelp(FormElement $element, FormHtmlElement $wrapper)
+    {
+        if ($element->hasHelp()) $wrapper->addContent(new FormHtmlElement('p', ['help-block'], $element->getHelp()));
     }
 
     /**
@@ -172,16 +179,20 @@ class BootstrapRenderer implements IFormRenderer
      * @param $icon_class
      * @return FormHtmlElement
      */
-    protected function renderDateTimeElement(FormElement $element, $icon_class): FormHtmlElement
+    protected function renderDateTimeElement(FormElement $element, $icon_class)
     {
         $element->addClass('pull-right');
+        $element->addClass('form-control');
         $wrapper = new FormHtmlElement('div');
-        foreach ($element->getWrapperClasses() as $class) $wrapper->addClass($class);
+        foreach($element->getWrapperClasses() as $class) $wrapper->addClass($class);
+        $wrapper->addClass('form-group');
         $wrapper->addContent($element->getLabel());
         $icon = new FormHtmlElement('div', ['input-group-addon'], new FormHtmlElement('i', ['fa', $icon_class]));
-        $wrapper->addContent(new FormHtmlElement('div', ['input-group'], $icon));
-        $wrapper->addContent($element->getHtmlElement());
+        $vnitrni = new FormHtmlElement('div', ['input-group'], $icon);
+        $vnitrni->addContent($element->getHtmlElement());
+        $wrapper->addContent($vnitrni);
         $this->renderElementSpan($element, $wrapper);
+        $this->renderElementHelp($element, $wrapper);
         $this->renderElementError($element, $wrapper);
         return $wrapper;
     }
@@ -191,17 +202,19 @@ class BootstrapRenderer implements IFormRenderer
      * @param $inline
      * @return string
      */
-    protected function renderSelectElement(FormElement $element, $inline): string
+    protected function renderSelectElement(FormElement $element, $inline)
     {
         $s = "";
         $label = $element->getLabel();
         if (!$inline)
         {
             $wrapper = new FormHtmlElement('div');
-            foreach ($element->getWrapperClasses() as $class) $wrapper->addClass($class);
+            $wrapper->addClass('form-group');
+            foreach($element->getWrapperClasses() as $class) $wrapper->addClass($class);
             $wrapper->addContent($label);
             $wrapper->addContent($element->getHtmlElement());
             if ($element->hasError()) $wrapper->addContent(new FormHtmlElement('span', ['help-block', 'with-errors'], $element->getError()));
+            $this->renderElementHelp($element, $wrapper);
             $s .= $wrapper->getHtml();
         }
         else
@@ -213,6 +226,11 @@ class BootstrapRenderer implements IFormRenderer
                 $span = new FormHtmlElement('span', ['help-block', 'with-errors'], $element->getError());
                 $s .= $span->getHtml();
             }
+            if ($element->hasHelp())
+            {
+                $p = new FormHtmlElement('p', ['help-block'], $element->getHelp());
+                $s .= $p->getHtml();
+            }
         }
         return $s;
     }
@@ -221,15 +239,16 @@ class BootstrapRenderer implements IFormRenderer
      * @param FormElement $element
      * @return string
      */
-    protected function renderInputElement(FormElement $element): string
+    protected function renderInputElement(FormElement $element)
     {
         $s = "";
         $wrapper = new FormHtmlElement('div', ['form-group']);
-        foreach ($element->getWrapperClasses() as $class) $wrapper->addClass($class);
+        foreach($element->getWrapperClasses() as $class) $wrapper->addClass($class);
         if ($element->getLabelView()) $wrapper->addContent($element->getLabel());
         $wrapper->addContent($element->getHtmlElement());
         if ($element->span) $wrapper->addContent(new FormHtmlElement('span', [$element->span]));
         if ($element->hasError()) $wrapper->addContent(new FormHtmlElement('span', ['help-block', 'with-errors'], $element->getError()));
+        $this->renderElementHelp($element, $wrapper);
         $s .= $wrapper->getHtml();
         return $s;
     }

@@ -1,0 +1,12 @@
+{
+  "name": "JSS/Form",
+  "description": "Tvorba formulářů",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Jana Senkova",
+      "email": "email@example.com"
+    }
+  ]
+}

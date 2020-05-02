@@ -44,11 +44,13 @@ class FormInputRadio extends FormElement
         $control->setAttribute('name', $this->name);
         $control->setAttribute('value', $value);
         $control->setAttribute('type', $this->elementType);
+        $control->setAttribute('type', $this->elementType);
         if ($checked) $control->setUnpairedAttribute('checked');
         $label->addContent($control);
         $label->addContent($text);
         return $label;
     }
+
 
     public function render()
     {
@@ -59,7 +61,7 @@ class FormInputRadio extends FormElement
         foreach ($this->value as $key => $text)
         {
             $s .= "<label class='" . join(' ', $this->classes) . "'>";
-            $s .= "<input type='$this->type' name='$this->name' value='$key'" . ($this->selected == $key?"checked='checked'":"") . ">$text";
+            $s .= "<input type='$this->type' name='$this->name' value='$key'" . ($this->selected == $key?"checked='checked'":"") . "> $text";
             $s .= "</label>";
         }
         $s .= "</div>";

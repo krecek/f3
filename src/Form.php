@@ -51,6 +51,8 @@ class Form extends FormContainer
     {
         if (!$this->loaded) $this->loadValues();
         $values = parent::getValues();
+
+
         if (isset($values[self::FORM_HASH_NAME])) unset($values[self::FORM_HASH_NAME]);
         foreach ($this->submits as $submit => $val)
         {
@@ -137,7 +139,7 @@ class Form extends FormContainer
     public function setInline($inline = false)
     {
         $this->inline = $inline;
-        $this->addClass('form-inline');
+        if ($inline) $this->addClass('form-inline');
         return $this;
     }
 
@@ -208,9 +210,9 @@ class Form extends FormContainer
         if (!$values) return;
         foreach ($values as $key => $value)
         {
-            if ($key !== self::FORM_HASH_NAME && isset($this->elements[$key]))
+            if ($key !== self::FORM_HASH_NAME && isset($this->allElements[$key]))
             {
-                $this->elements[$key]->setDefault($value);
+                $this->allElements[$key]->setDefault($value);
             }
         }
     }
@@ -230,14 +232,15 @@ class Form extends FormContainer
      */
     public function validate()
     {
+        if (!$this->loaded) $this->loadValues();
         if (!$this->checkValidate)
         {
             $this->validateHash();
-            foreach ($this->getAllElements() as $element)
+            foreach($this->getAllElements() as $element)
             {
                 $element->validate();
             }
-            foreach ($this->validates as $validate) call_user_func($validate, $this);
+            foreach($this->validates as $validate) call_user_func($validate, $this);
             $this->checkValidate = true;
         }
         return !$this->hasError();

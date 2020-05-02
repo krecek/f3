@@ -10,14 +10,14 @@ class FormHtmlElement
     protected $classes = [];
     protected $type;
     protected $isPair = true;
-    protected $content = [];
+//    protected $content = [];
     protected $attributes = [];
     protected $unpairedAttributes = [];
     protected $pairs = [
-        'div', 'span', 'label', 'textarea', 'button', 'a', 'optgroup', 'i','option','select',
+        'div', 'span', 'label', 'textarea', 'button', 'a', 'optgroup', 'i', 'option', 'select', 'p',
     ];
     protected $allowed = [
-        'div', 'span', 'label', 'input', 'button', 'textarea', 'select', 'option', 'optgroup', 'i',
+        'div', 'span', 'label', 'input', 'button', 'textarea', 'select', 'option', 'optgroup', 'i', 'p',
     ];
     protected $classes_removed;
 

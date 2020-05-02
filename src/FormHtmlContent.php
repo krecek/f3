@@ -8,10 +8,10 @@ trait FormHtmlContent
 {
     protected $content = [];
 
-    public function getContent(): array
+    public function getContent()
     {
         return $this->content;
     }
 
-    abstract public function getHtml(): string;
+    abstract public function getHtml();
 }

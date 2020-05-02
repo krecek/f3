@@ -17,6 +17,7 @@ abstract class FormElement implements IFormElement
     public $label;
     protected $label_view = true;
     public $error;
+    protected $help = null;
     public $classes = array();
     public $classes_removed = array();
     public $wrapper_classes = array();
@@ -118,6 +119,11 @@ abstract class FormElement implements IFormElement
         return $this;
     }
 
+    public function disable()
+    {
+        $this->setAttribute('disabled', 'disabled');
+    }
+
     public function getName()
     {
         return $this->name;
@@ -193,20 +199,39 @@ abstract class FormElement implements IFormElement
         else return false;
     }
 
-    public function addRule($callback, $message=null, $parameter=null)
+    public function addRule($callback, $message = null, $parameter = null)
     {
         $r = new Rule($callback);
         $r->setErrorMessage($message);
-        if(!is_array($parameter)) $parameter = [$parameter];
+        if (!is_array($parameter)) $parameter = [$parameter];
         $r->setParameters($parameter);
         $this->rules[] = $r;
+        return $this;
+    }
+
+    public function setHelp($text)
+    {
+        $this->help = $text;
+    }
+
+    public function getHelp()
+    {
+        return $this->help;
+    }
+
+    public function hasHelp()
+    {
+        return (bool)$this->getHelp();
     }
 
     public function validate()
     {
         foreach($this->rules as $rule)
         {
-            if(!$rule->validate($this->sendValue)) $this->setError($rule->getErrorMessage());
+            if (!$rule->validate($this->sendValue))
+            {
+                $this->setError($rule->getErrorMessage());
+            }
         }
     }
 

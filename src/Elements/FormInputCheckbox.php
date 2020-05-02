@@ -7,7 +7,7 @@ class FormInputCheckbox extends FormElementInput
 
     protected $type = 'checkbox';
 
-    public function __construct($name, $label = '', $value = '', $default_value = '')
+    public function __construct($name, $label = '', $value = '', $default_value = 'on')
     {
         parent::__construct($name, $label, $default_value);
         $this->elementType = 'checkbox';

@@ -14,6 +14,7 @@ class FormSelect extends FormElement
 
     public function __construct($name, $label = '', $values = '', $selected = '')
     {
+        foreach($values as $key => $value) $values[$key] = (string)$value;
         parent::__construct($name, $label, $values);
         $this->elementType = 'select';
         $this->html_element_type = 'select';
@@ -72,7 +73,7 @@ class FormSelect extends FormElement
      * @param $value
      * @return bool
      */
-    protected function isSelected($value): bool
+    protected function isSelected($value)
     {
         return $this->selected == $value;
     }
