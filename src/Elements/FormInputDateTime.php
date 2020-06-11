@@ -13,6 +13,7 @@ class FormInputDateTime extends FormElementInput
         $this->elementType = 'datetime';
         $this->setAttribute('id', $id);
         $this->addClass('datetimepicker');
+        $this->setAttribute("autocomplete", "off");
     }
 
     public function setDefault($value)

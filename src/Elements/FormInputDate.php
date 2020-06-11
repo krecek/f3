@@ -11,7 +11,7 @@ class FormInputDate extends FormElementInput
         parent::__construct($name, $label, $value);
         $this->elementType = 'date';
         $this->setAttribute('id', $id);
-
+        $this->setAttribute("autocomplete", "off");
     }
 
     public function setDefault($value)
