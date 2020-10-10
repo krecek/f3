@@ -22,4 +22,6 @@ interface IRule
 
     public function getErrorMessage();
 
+    public function getJavasriptCode();
+
 }

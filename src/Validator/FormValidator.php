@@ -63,6 +63,33 @@ class FormValidator
         self::PHONE => 'Please enter a valid phone number.',
     ];
 
+    public static $javascriptCodes = [
+        self::MIN => 'min',
+        self::MAX => 'max',
+        self::RANGE => 'range',
+        self::EQUAL => 'equal',
+        self::NOT_EQUAL => 'not_equal',
+        self::MIN_LENGTH => 'min_length',
+        self::MAX_LENGTH => 'max_length',
+        self::LENGTH => 'length',
+        self::PATTERN => 'pattern',
+        self::REGEX => 'regex',
+        self::INTEGER => 'integer',
+        self::FLOAT => 'float',
+        self::FILLED => 'filled',
+        self::REQUIRED => 'required',
+        self::IS_IN => 'is_in',
+        self::IS_NOT_IN => 'is_not_in',
+        self::EMAIL => 'email',
+        self::BANK => 'bank',
+        self::RC => 'rc',
+        self::MOBIL => 'mobil',
+        self::PSC => 'psc',
+        self::URL => 'url',
+        self::IP => 'ip',
+        self::PHONE => 'phone',
+    ];
+
     /**
      * @param $value
      * @param $min

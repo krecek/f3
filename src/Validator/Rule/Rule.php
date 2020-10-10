@@ -49,4 +49,22 @@ class Rule implements IRule
         else return '';
     }
 
+    public function getJavasriptCode()
+    {
+        var_dump($this->callback);
+
+        if (property_exists($this->validator, 'javascriptCodes') && $this->validator::$javascriptCodes[$this->callback])
+        {
+            return [
+                "op" => $this->validator::$javascriptCodes[$this->callback],
+                "msg" => $this->getErrorMessage(),
+                "arg" => $this->parameters,
+            ];
+        }
+        else
+        {
+            return '';
+        }
+    }
+
 }

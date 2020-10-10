@@ -4,6 +4,7 @@ namespace Jss\Form\Elements;
 
 
 use Jss\Form\FormHtmlElement;
+use Jss\Form\Validator\Rule\IRule;
 use Jss\Form\Validator\Rule\Rule;
 
 abstract class FormElement implements IFormElement
@@ -29,6 +30,7 @@ abstract class FormElement implements IFormElement
     protected $html_element;
     public $span;
     protected $sendValue;
+    /** @var IRule[] */
     protected $rules = array();
 
     public function __construct($name, $label = '', $value = '')
@@ -206,6 +208,7 @@ abstract class FormElement implements IFormElement
         if (!is_array($parameter)) $parameter = [$parameter];
         $r->setParameters($parameter);
         $this->rules[] = $r;
+        $this->setAttribute('data-validate-rules', $this->getJavasriptValidationCodes());
         return $this;
     }
 
@@ -233,6 +236,20 @@ abstract class FormElement implements IFormElement
                 $this->setError($rule->getErrorMessage());
             }
         }
+    }
+
+    protected function getJavasriptValidationCodes()
+    {
+        //        return 'v';
+        $codes = [];
+        foreach($this->rules as $rule)
+        {
+            $codes[] = $rule->getJavasriptCode();
+        }
+        $codes = array_filter($codes);
+        if ($codes) $text = json_encode($codes);
+        else $text = '';
+        return $text;
     }
 
 }

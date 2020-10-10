@@ -1,3 +1,7 @@
+<html>
+<body>
+
+
 <?php
 session_start();
 /**
@@ -98,6 +102,9 @@ include_once 'src/autoload.php';
 //    echo $form->render();
 //    echo $form2;
 //}
+
+$form2 = createForm2();
+echo($form2);
 die();
 
 function createForm3()
@@ -121,10 +128,15 @@ function createForm()
 function createForm2()
 {
     $form = new Form('', 'post', 'form2');
-    $form->addText('b', 'B:', 'B')->addRule('Jss\Form\Validator\Validator::equal','Hodnota musí být rovna %s','Q');
+    $form->addText('b', 'B:', 'B')
+        ->addRule(\Jss\Form\Validator\FormValidator::EQUAL, 'Hodnota musí být rovna %s', 'Q')
+        ->addRule(\Jss\Form\Validator\FormValidator::MIN, "Hodnota musí být aspoň %s", 10);
     $form->addSubmit('send', 'Uložit');
     $form->loadState();
     $form->addValidate('overit');
     return $form;
 }
 
+?>
+</body>
+</html>
